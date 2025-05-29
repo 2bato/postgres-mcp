@@ -12,7 +12,7 @@ from typing import Literal
 from typing import Union
 
 import mcp.types as types
-from mcp.server.fastmcp import FastMCP
+from fastmcp import FastMCP
 from pydantic import Field
 from pydantic import validate_call
 
@@ -523,9 +523,9 @@ async def main():
     parser.add_argument(
         "--transport",
         type=str,
-        choices=["stdio", "sse"],
+        choices=["stdio", "sse", "streamable-http"],
         default="stdio",
-        help="Select MCP transport: stdio (default) or sse",
+        help="Select MCP transport: stdio (default) or sse or streamable-http",
     )
     parser.add_argument(
         "--sse-host",
@@ -538,6 +538,18 @@ async def main():
         type=int,
         default=8000,
         help="Port for SSE server (default: 8000)",
+    )
+    parser.add_argument(
+        "--streamable-http-host",
+        type=str,
+        default="localhost",
+        help="Host to bind Streamable HTTP server to (default: localhost)",
+    )
+    parser.add_argument(
+        "--streamable-http-port",
+        type=int,
+        default=8001,
+        help="Port for Streamable HTTP server (default: 8001)",
     )
 
     args = parser.parse_args()
@@ -587,12 +599,18 @@ async def main():
 
     # Run the server with the selected transport (always async)
     if args.transport == "stdio":
-        await mcp.run_stdio_async()
-    else:
+        await mcp.run_async("stdio")
+    elif args.transport == "sse":
         # Update FastMCP settings based on command line arguments
         mcp.settings.host = args.sse_host
         mcp.settings.port = args.sse_port
-        await mcp.run_sse_async()
+        await mcp.run_async("sse", host=args.sse_host, port=args.sse_port)
+    elif args.transport == "streamable-http":
+        mcp.settings.host = args.streamable_http_host
+        mcp.settings.port = args.streamable_http_port
+        await mcp.run_async("streamable-http", host=args.streamable_http_host, port=args.streamable_http_port)
+    else:
+        raise ValueError(f"Unknown transport: {args.transport}")
 
 
 async def shutdown(sig=None):
