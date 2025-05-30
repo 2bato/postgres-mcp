@@ -12,7 +12,7 @@ from typing import Literal
 from typing import Union
 
 import mcp.types as types
-from fastmcp import FastMCP
+from mcp.server.fastmcp import FastMCP
 from pydantic import Field
 from pydantic import validate_call
 
@@ -542,8 +542,8 @@ async def main():
     parser.add_argument(
         "--streamable-http-host",
         type=str,
-        default="localhost",
-        help="Host to bind Streamable HTTP server to (default: localhost)",
+        default="0.0.0.0",
+        help="Host to bind Streamable HTTP server to (default: 0.0.0.0)",
     )
     parser.add_argument(
         "--streamable-http-port",
@@ -599,16 +599,16 @@ async def main():
 
     # Run the server with the selected transport (always async)
     if args.transport == "stdio":
-        await mcp.run_async("stdio")
+        await mcp.run_stdio_async()
     elif args.transport == "sse":
         # Update FastMCP settings based on command line arguments
         mcp.settings.host = args.sse_host
         mcp.settings.port = args.sse_port
-        await mcp.run_async("sse", host=args.sse_host, port=args.sse_port)
+        await mcp.run_sse_async()
     elif args.transport == "streamable-http":
         mcp.settings.host = args.streamable_http_host
         mcp.settings.port = args.streamable_http_port
-        await mcp.run_async("streamable-http", host=args.streamable_http_host, port=args.streamable_http_port)
+        await mcp.run_streamable_http_async()
     else:
         raise ValueError(f"Unknown transport: {args.transport}")
 
