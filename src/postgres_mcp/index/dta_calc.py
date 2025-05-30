@@ -2,7 +2,6 @@ import logging
 import time
 from itertools import combinations
 from typing import Any
-from typing import override
 
 import humanize
 from pglast.ast import ColumnRef
@@ -65,7 +64,6 @@ class DatabaseTuningAdvisor(IndexTuningBase):
         elapsed = time.time() - self._analysis_start_time
         return elapsed > self.max_runtime_seconds
 
-    @override
     async def _generate_recommendations(self, query_weights: list[tuple[str, SelectStmt, float]]) -> tuple[set[IndexRecommendation], float]:
         """Generate index recommendations using a hybrid 'seed + greedy' approach with a time cutoff."""
 

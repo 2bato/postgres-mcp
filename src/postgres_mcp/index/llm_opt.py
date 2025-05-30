@@ -2,7 +2,6 @@ import logging
 import math
 from dataclasses import dataclass
 from typing import Any
-from typing import override
 
 import instructor
 from openai import OpenAI
@@ -70,7 +69,6 @@ class LLMOptimizerTool(IndexTuningBase):
     def score(self, execution_cost: float, index_size: float) -> float:
         return math.log(execution_cost) + self.pareto_alpha * math.log(index_size)
 
-    @override
     async def _generate_recommendations(self, query_weights: list[tuple[str, SelectStmt, float]]) -> tuple[set[IndexRecommendation], float]:
         """Generate index tuning queries using optimization by LLM."""
         # For now we support only one table at a time
